@@ -589,7 +589,7 @@ namespace pinocchio
         const JointIndex i = jmodel.id();
         const JointIndex parent = model.parents[i];
 
-        typename PINOCCHIO_EIGEN_PLAIN_ROW_MAJOR_TYPE(MatrixNV6) Mat_tmp(jmodel.nv(), 6);
+        typename PINOCCHIO_EIGEN_PLAIN_ROW_MAJOR_TYPE(MatrixNV6) Mat_tmp(jmodel.nj(), 6);
 
         typedef
           typename SizeDepType<JointModel::NV>::template ColsReturn<typename Data::Matrix6x>::Type
@@ -607,14 +607,12 @@ namespace pinocchio
         motionSet::inertiaAction(data.oYcrb[i], J_cols, Ag_cols);
         for (int j = data.parents_fromRow[(JointIndex)jmodel.idx_v()]; j >= 0;
              j = data.parents_fromRow[(JointIndex)j])
-          data.C.middleRows(jmodel.idx_v(), jmodel.nv()).col(j).noalias() +=
-            Ag_cols.transpose() * data.dJ.col(j);
+          jmodel.jointVelRows(data.C).col(j).noalias() += Ag_cols.transpose() * data.dJ.col(j);
 
-        Mat_tmp.topRows(jmodel.nv()).noalias() = J_cols.transpose() * data.B[i];
+        Mat_tmp.topRows(jmodel.nj()).noalias() = J_cols.transpose() * data.B[i];
         for (int j = data.parents_fromRow[(JointIndex)jmodel.idx_v()]; j >= 0;
              j = data.parents_fromRow[(JointIndex)j])
-          data.C.middleRows(jmodel.idx_v(), jmodel.nv()).col(j).noalias() +=
-            Mat_tmp * data.J.col(j);
+          jmodel.jointVelRows(data.C).col(j).noalias() += Mat_tmp * data.J.col(j);
 
         if (parent > 0)
         {
@@ -686,7 +684,7 @@ namespace pinocchio
       const JointIndex i = jmodel.id();
       const JointIndex parent = model.parents[i];
 
-      typename PINOCCHIO_EIGEN_PLAIN_ROW_MAJOR_TYPE(MatrixNV6) Mat_tmp(jmodel.nv(), 6);
+      typename PINOCCHIO_EIGEN_PLAIN_ROW_MAJOR_TYPE(MatrixNV6) Mat_tmp(jmodel.nj(), 6);
 
       typedef
         typename SizeDepType<JointModel::NV>::template ColsReturn<typename Data::Matrix6x>::Type
@@ -708,7 +706,7 @@ namespace pinocchio
            j = data.parents_fromRow[(JointIndex)j])
         jmodel.jointVelRows(data.C).col(j).noalias() = Ag_cols.transpose() * data.dJ.col(j);
 
-      Mat_tmp.topRows(jmodel.nv()).noalias() = J_cols.transpose() * data.B[i];
+      Mat_tmp.topRows(jmodel.nj()).noalias() = J_cols.transpose() * data.B[i];
       for (int j = data.parents_fromRow[(JointIndex)jmodel.idx_v()]; j >= 0;
            j = data.parents_fromRow[(JointIndex)j])
         jmodel.jointVelRows(data.C).col(j) += Mat_tmp * data.J.col(j);
