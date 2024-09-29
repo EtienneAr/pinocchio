@@ -185,8 +185,8 @@ namespace pinocchio
         {
           Ia.noalias() -= jdata.UDinv() * jdata.U().transpose();
 
-          fi.toVector().noalias() +=
-            Ia * data.oa_gf[i].toVector() + jdata.UDinv() * jmodel.jointVelocityFromDofSelector(data.u);
+          fi.toVector().noalias() += Ia * data.oa_gf[i].toVector()
+                                     + jdata.UDinv() * jmodel.jointVelocityFromDofSelector(data.u);
           data.oYaba[parent] += Ia;
           data.of[parent] += fi;
         }
@@ -224,7 +224,8 @@ namespace pinocchio
         jmodel.jointVelocityFromDofSelector(data.ddq).noalias() =
           jdata.Dinv() * jmodel.jointVelocityFromDofSelector(data.u)
           - jdata.UDinv().transpose() * data.oa_gf[i].toVector();
-        data.oa_gf[i].toVector().noalias() += J_cols * jmodel.jointVelocityFromDofSelector(data.ddq);
+        data.oa_gf[i].toVector().noalias() +=
+          J_cols * jmodel.jointVelocityFromDofSelector(data.ddq);
 
         // Handle consistent output
         data.oa[i] = data.oa_gf[i] + model.gravity;
@@ -434,8 +435,8 @@ namespace pinocchio
         if (parent > 0)
         {
           Force & pa = data.f[i];
-          pa.toVector().noalias() +=
-            Ia * data.a_gf[i].toVector() + jdata.UDinv() * jmodel.jointVelocityFromDofSelector(data.u);
+          pa.toVector().noalias() += Ia * data.a_gf[i].toVector()
+                                     + jdata.UDinv() * jmodel.jointVelocityFromDofSelector(data.u);
           data.Yaba[parent] += internal::SE3actOn<Scalar>::run(data.liMi[i], Ia);
           data.f[parent] += data.liMi[i].act(pa);
         }
