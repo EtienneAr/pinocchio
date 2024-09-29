@@ -392,7 +392,8 @@ namespace pinocchio
 
       typename LieGroupMap::template operation<JointModel>::type lgo;
       lgo.dDifference(
-        jmodel.jointConfigFromNqSelector(q0.derived()), jmodel.jointConfigFromNqSelector(q1.derived()),
+        jmodel.jointConfigFromNqSelector(q0.derived()),
+        jmodel.jointConfigFromNqSelector(q1.derived()),
         jmodel.jointJacBlock(PINOCCHIO_EIGEN_CONST_CAST(JacobianMatrix, mat)), arg);
     }
   };
@@ -438,7 +439,8 @@ namespace pinocchio
 
       typename LieGroupMap::template operation<JointModel>::type lgo;
       lgo.interpolate(
-        jmodel.jointConfigFromNqSelector(q0.derived()), jmodel.jointConfigFromNqSelector(q1.derived()), u,
+        jmodel.jointConfigFromNqSelector(q0.derived()),
+        jmodel.jointConfigFromNqSelector(q1.derived()), u,
         jmodel.jointConfigFromNqSelector(PINOCCHIO_EIGEN_CONST_CAST(ConfigVectorOut, result)));
     }
   };
@@ -478,7 +480,8 @@ namespace pinocchio
 
       typename LieGroupMap::template operation<JointModel>::type lgo;
       lgo.difference(
-        jmodel.jointConfigFromNqSelector(q0.derived()), jmodel.jointConfigFromNqSelector(q1.derived()),
+        jmodel.jointConfigFromNqSelector(q0.derived()),
+        jmodel.jointConfigFromNqSelector(q1.derived()),
         jmodel.jointVelocitySelector(PINOCCHIO_EIGEN_CONST_CAST(TangentVectorOut, result)));
     }
   };
@@ -522,7 +525,8 @@ namespace pinocchio
       typename LieGroupMap::template operation<JointModel>::type lgo;
       DistanceVectorOut & distances_ = PINOCCHIO_EIGEN_CONST_CAST(DistanceVectorOut, distances);
       distances_[(Eigen::DenseIndex)i] += lgo.squaredDistance(
-        jmodel.jointConfigFromNqSelector(q0.derived()), jmodel.jointConfigFromNqSelector(q1.derived()));
+        jmodel.jointConfigFromNqSelector(q0.derived()),
+        jmodel.jointConfigFromNqSelector(q1.derived()));
     }
   };
 
@@ -555,7 +559,8 @@ namespace pinocchio
       typedef typename Visitor::LieGroupMap LieGroupMap;
       typename LieGroupMap::template operation<JointModel>::type lgo;
       squaredDistance += lgo.squaredDistance(
-        jmodel.jointConfigFromNqSelector(q0.derived()), jmodel.jointConfigFromNqSelector(q1.derived()));
+        jmodel.jointConfigFromNqSelector(q0.derived()),
+        jmodel.jointConfigFromNqSelector(q1.derived()));
     }
   };
 
@@ -624,7 +629,8 @@ namespace pinocchio
       typedef typename Visitor::LieGroupMap LieGroupMap;
 
       typename LieGroupMap::template operation<JointModel>::type lgo;
-      lgo.normalize(jmodel.jointConfigFromNqSelector(PINOCCHIO_EIGEN_CONST_CAST(ConfigVectorType, qout)));
+      lgo.normalize(
+        jmodel.jointConfigFromNqSelector(PINOCCHIO_EIGEN_CONST_CAST(ConfigVectorType, qout)));
     }
   };
 
@@ -691,7 +697,8 @@ namespace pinocchio
 
       typename LieGroupMap::template operation<JointModel>::type lgo;
       isSame &= lgo.isSameConfiguration(
-        jmodel.jointConfigFromNqSelector(q1.derived()), jmodel.jointConfigFromNqSelector(q2.derived()), prec);
+        jmodel.jointConfigFromNqSelector(q1.derived()),
+        jmodel.jointConfigFromNqSelector(q2.derived()), prec);
     }
   };
 

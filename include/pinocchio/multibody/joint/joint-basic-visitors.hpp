@@ -159,7 +159,6 @@ namespace pinocchio
   template<typename Scalar, int Options, template<typename S, int O> class JointCollectionTpl>
   inline int nj(const JointModelTpl<Scalar, Options, JointCollectionTpl> & jmodel);
 
-
   /**
    * @brief      Visit a JointModelTpl through JointConfigurationLimitVisitor
    *             to get the configurations limits
@@ -220,7 +219,6 @@ namespace pinocchio
   template<typename Scalar, int Options, template<typename S, int O> class JointCollectionTpl>
   inline int idx_j(const JointModelTpl<Scalar, Options, JointCollectionTpl> & jmodel);
 
-
   /**
    * @brief      Visit a JointModelTpl through JointIdVisitor to get the index of the joint in the
    * kinematic chain
@@ -249,7 +247,11 @@ namespace pinocchio
    */
   template<typename Scalar, int Options, template<typename S, int O> class JointCollectionTpl>
   inline void setIndexes(
-    JointModelTpl<Scalar, Options, JointCollectionTpl> & jmodel, JointIndex id, int q, int v, int j);
+    JointModelTpl<Scalar, Options, JointCollectionTpl> & jmodel,
+    JointIndex id,
+    int q,
+    int v,
+    int j);
 
   /**
    * @brief      Visit a JointModelTpl through JointShortnameVisitor to get the shortname of the
@@ -459,8 +461,9 @@ namespace pinocchio
     const JointDataBase<JointDataDerived> & jmodel);
 
   /**
-   * @brief  Transfer a value from one variant to another (given that the new variant contains the type of the value).
-   * For instance transfer a joint model (or data) from a generic joint model (or data) to another generic joint model (or data) with slightly different joint collections.
+   * @brief  Transfer a value from one variant to another (given that the new variant contains the
+   * type of the value). For instance transfer a joint model (or data) from a generic joint model
+   * (or data) to another generic joint model (or data) with slightly different joint collections.
    *
    * @param[in]  variant  The value to transfer.
    *
