@@ -66,7 +66,7 @@ namespace pinocchio
           data.v[i] += data.liMi[i].actInv(data.v[parent]);
 
         data.a_gf[i] = jdata.c() + (data.v[i] ^ jdata.v());
-        data.a_gf[i] += jdata.S() * jmodel.jointVelocitySelector(a);
+        data.a_gf[i] += jdata.S() * jmodel.jointVelocityFromDofSelector(a);
         data.a_gf[i] += data.liMi[i].actInv(data.a_gf[parent]);
         //
         //      data.f[i] = model.inertias[i]*data.a_gf[i];// + model.inertias[i].vxiv(data.v[i]);
@@ -100,7 +100,7 @@ namespace pinocchio
 
         const JointIndex i = jmodel.id();
         const JointIndex parent = model.parents[i];
-        jmodel.jointVelocitySelector(data.tau) += jdata.S().transpose() * data.f[i];
+        jmodel.jointVelocityFromDofSelector(data.tau) += jdata.S().transpose() * data.f[i];
 
         if (parent > 0)
           data.f[parent] += data.liMi[i].act(data.f[i]);
@@ -284,7 +284,7 @@ namespace pinocchio
         const JointIndex & i = jmodel.id();
         const JointIndex & parent = model.parents[i];
 
-        jmodel.jointVelocitySelector(data.nle) = jdata.S().transpose() * data.f[i];
+        jmodel.jointVelocityFromDofSelector(data.nle) += jdata.S().transpose() * data.f[i];
         if (parent > 0)
           data.f[parent] += data.liMi[i].act(data.f[i]);
       }
@@ -312,6 +312,7 @@ namespace pinocchio
       typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
       typedef typename Model::JointIndex JointIndex;
 
+      data.nle.setZero();
       data.v[0].setZero();
       data.a_gf[0] = -model.gravity;
 
@@ -394,7 +395,7 @@ namespace pinocchio
         const JointIndex & i = jmodel.id();
         const JointIndex & parent = model.parents[i];
 
-        jmodel.jointVelocitySelector(g) = jdata.S().transpose() * data.f[i];
+        jmodel.jointVelocityFromDofSelector(g) = jdata.S().transpose() * data.f[i];
         if (parent > 0)
           data.f[(size_t)parent] += data.liMi[i].act(data.f[i]);
       }
@@ -419,6 +420,7 @@ namespace pinocchio
       typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
       typedef typename Model::JointIndex JointIndex;
 
+      data.g.setZero();
       data.a_gf[0] = -model.gravity;
 
       typedef ComputeGeneralizedGravityForwardStep<
