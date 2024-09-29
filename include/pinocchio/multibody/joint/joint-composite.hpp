@@ -478,13 +478,26 @@ namespace pinocchio
 
     template<typename D>
     typename SizeDepType<NQ>::template SegmentReturn<D>::ConstType
-    jointConfigSelector(const Eigen::MatrixBase<D> & a) const
+    jointConfigFromDofSelector(const Eigen::MatrixBase<D> & a) const
     {
       return a.segment(Base::i_q, nq());
     }
     template<typename D>
     typename SizeDepType<NQ>::template SegmentReturn<D>::Type
-    jointConfigSelector(Eigen::MatrixBase<D> & a) const
+    jointConfigFromDofSelector(Eigen::MatrixBase<D> & a) const
+    {
+      return a.segment(Base::i_q, nq());
+    }
+
+    template<typename D>
+    typename SizeDepType<NQ>::template SegmentReturn<D>::ConstType
+    jointConfigFromNqSelector(const Eigen::MatrixBase<D> & a) const
+    {
+      return a.segment(Base::i_q, nq());
+    }
+    template<typename D>
+    typename SizeDepType<NQ>::template SegmentReturn<D>::Type
+    jointConfigFromNqSelector(Eigen::MatrixBase<D> & a) const
     {
       return a.segment(Base::i_q, nq());
     }
@@ -529,16 +542,30 @@ namespace pinocchio
 
     template<typename D>
     typename SizeDepType<Eigen::Dynamic>::template SegmentReturn<D>::ConstType
-    jointConfigSelector_impl(const Eigen::MatrixBase<D> & a) const
+    jointConfigFromNqSelector_impl(const Eigen::MatrixBase<D> & a) const
     {
       return a.segment(Base::i_q, nq());
     }
     template<typename D>
     typename SizeDepType<Eigen::Dynamic>::template SegmentReturn<D>::Type
-    jointConfigSelector_impl(Eigen::MatrixBase<D> & a) const
+    jointConfigFromNqSelector_impl(Eigen::MatrixBase<D> & a) const
     {
       return a.segment(Base::i_q, nq());
     }
+
+    template<typename D>
+    typename SizeDepType<Eigen::Dynamic>::template SegmentReturn<D>::ConstType
+    jointConfigFromDofSelector_impl(const Eigen::MatrixBase<D> & a) const
+    {
+      return a.segment(Base::i_q, nq());
+    }
+    template<typename D>
+    typename SizeDepType<Eigen::Dynamic>::template SegmentReturn<D>::Type
+    jointConfigFromDofSelector_impl(Eigen::MatrixBase<D> & a) const
+    {
+      return a.segment(Base::i_q, nq());
+    }
+
     template<typename D>
     typename SizeDepType<Eigen::Dynamic>::template SegmentReturn<D>::ConstType
     jointVelocitySelector_impl(const Eigen::MatrixBase<D> & a) const
