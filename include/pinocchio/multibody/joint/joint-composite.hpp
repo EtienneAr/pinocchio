@@ -28,7 +28,7 @@ namespace pinocchio
     {
       Options = _Options,
       NQ = Eigen::Dynamic,
-      NV = Eigen::Dynamic, 
+      NV = Eigen::Dynamic,
       NJ = Eigen::Dynamic
     };
 
@@ -195,12 +195,12 @@ namespace pinocchio
     typedef PINOCCHIO_ALIGNED_STD_VECTOR(JointModelVariant) JointModelVector;
 
     using Base::id;
+    using Base::idx_j;
     using Base::idx_q;
     using Base::idx_v;
-    using Base::idx_j;
+    using Base::nj;
     using Base::nq;
     using Base::nv;
-    using Base::nj;
     using Base::setIndexes;
 
     /// \brief Default contructor
@@ -504,12 +504,25 @@ namespace pinocchio
 
     template<typename D>
     typename SizeDepType<NV>::template ColsReturn<D>::ConstType
-    jointCols(const Eigen::MatrixBase<D> & A) const
+    jointVelCols(const Eigen::MatrixBase<D> & A) const
+    {
+      return A.middleCols(Base::i_v, nv());
+    }
+    template<typename D>
+    typename SizeDepType<NV>::template ColsReturn<D>::ConstType
+    jointJacCols(const Eigen::MatrixBase<D> & A) const
     {
       return A.middleCols(Base::i_j, nj());
     }
     template<typename D>
-    typename SizeDepType<NV>::template ColsReturn<D>::Type jointCols(Eigen::MatrixBase<D> & A) const
+    typename SizeDepType<NV>::template ColsReturn<D>::Type
+    jointVelCols(Eigen::MatrixBase<D> & A) const
+    {
+      return A.middleCols(Base::i_v, nv());
+    }
+    template<typename D>
+    typename SizeDepType<NV>::template ColsReturn<D>::Type
+    jointJacCols(Eigen::MatrixBase<D> & A) const
     {
       return A.middleCols(Base::i_j, nj());
     }
@@ -541,13 +554,25 @@ namespace pinocchio
 
     template<typename D>
     typename SizeDepType<Eigen::Dynamic>::template ColsReturn<D>::ConstType
-    jointCols_impl(const Eigen::MatrixBase<D> & A) const
+    jointVelCols_impl(const Eigen::MatrixBase<D> & A) const
+    {
+      return A.middleCols(Base::i_v, nv());
+    }
+    template<typename D>
+    typename SizeDepType<Eigen::Dynamic>::template ColsReturn<D>::ConstType
+    jointJacCols_impl(const Eigen::MatrixBase<D> & A) const
     {
       return A.middleCols(Base::i_j, nj());
     }
     template<typename D>
     typename SizeDepType<Eigen::Dynamic>::template ColsReturn<D>::Type
-    jointCols_impl(Eigen::MatrixBase<D> & A) const
+    jointVelCols_impl(Eigen::MatrixBase<D> & A) const
+    {
+      return A.middleCols(Base::i_v, nv());
+    }
+    template<typename D>
+    typename SizeDepType<Eigen::Dynamic>::template ColsReturn<D>::Type
+    jointJacCols_impl(Eigen::MatrixBase<D> & A) const
     {
       return A.middleCols(Base::i_j, nj());
     }
@@ -564,7 +589,7 @@ namespace pinocchio
     {
       int idx_q = this->idx_q();
       int idx_v = this->idx_v();
-      int idx_j = this->idx_j();      
+      int idx_j = this->idx_j();
 
       m_idx_q.resize(joints.size());
       m_idx_v.resize(joints.size());
@@ -579,7 +604,7 @@ namespace pinocchio
 
         m_idx_q[i] = idx_q;
         m_idx_v[i] = idx_v;
-        m_idx_j[i] = idx_j;        
+        m_idx_j[i] = idx_j;
         ::pinocchio::setIndexes(joint, i, idx_q, idx_v, idx_j);
         m_nqs[i] = ::pinocchio::nq(joint);
         m_nvs[i] = ::pinocchio::nv(joint);
@@ -607,7 +632,6 @@ namespace pinocchio
     std::vector<int> m_idx_j;
     /// \brief Dimension of the segment in the jacobian matrix
     std::vector<int> m_njs;
-
 
   public:
     /// \brief Number of joints contained in the JointModelComposite

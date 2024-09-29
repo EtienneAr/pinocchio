@@ -165,12 +165,13 @@ namespace pinocchio
 
 #define PINOCCHIO_DETAILS_JOINT_MIMIC_1(Algo)                                                      \
   template<typename Visitor, typename JointCollection>                                             \
-  struct Algo<Visitor, JointModelMimicTpl<JointCollection>> {                                      \
+  struct Algo<Visitor, JointModelMimicTpl<JointCollection>>                                        \
+  {                                                                                                \
     typedef typename Visitor::ArgsType ArgsType;                                                   \
-    static void run (PINOCCHIO_DETAILS_WRITE_ARGS_1(JointModelMimicTpl<JointCollection>))          \
-    {}                                                                                             \
+    static void run(PINOCCHIO_DETAILS_WRITE_ARGS_1(JointModelMimicTpl<JointCollection>))           \
+    {                                                                                              \
+    }                                                                                              \
   }
-
 
   } // namespace details
 
@@ -254,7 +255,7 @@ namespace pinocchio
       typename LieGroupMap::template operation<JointModel>::type lgo;
       lgo.dIntegrate(
         jmodel.jointConfigSelector(q.derived()), jmodel.jointVelocitySelector(v.derived()),
-        jmodel.jointBlock(PINOCCHIO_EIGEN_CONST_CAST(JacobianMatrixType, mat)), arg, op);
+        jmodel.jointJacBlock(PINOCCHIO_EIGEN_CONST_CAST(JacobianMatrixType, mat)), arg, op);
     }
   };
 
@@ -309,8 +310,8 @@ namespace pinocchio
       typename LieGroupMap::template operation<JointModel>::type lgo;
       lgo.dIntegrateTransport(
         jmodel.jointConfigSelector(q.derived()), jmodel.jointVelocitySelector(v.derived()),
-        jmodel.jointRows(mat_in.derived()),
-        jmodel.jointRows(PINOCCHIO_EIGEN_CONST_CAST(JacobianMatrixOutType, mat_out)), arg);
+        jmodel.jointJacRows(mat_in.derived()),
+        jmodel.jointJacRows(PINOCCHIO_EIGEN_CONST_CAST(JacobianMatrixOutType, mat_out)), arg);
     }
   };
 
@@ -358,7 +359,7 @@ namespace pinocchio
       typename LieGroupMap::template operation<JointModel>::type lgo;
       lgo.dIntegrateTransport(
         jmodel.jointConfigSelector(q.derived()), jmodel.jointVelocitySelector(v.derived()),
-        jmodel.jointRows(PINOCCHIO_EIGEN_CONST_CAST(JacobianMatrixType, mat)), arg);
+        jmodel.jointJacRows(PINOCCHIO_EIGEN_CONST_CAST(JacobianMatrixType, mat)), arg);
     }
   };
 
@@ -402,7 +403,7 @@ namespace pinocchio
       typename LieGroupMap::template operation<JointModel>::type lgo;
       lgo.dDifference(
         jmodel.jointConfigSelector(q0.derived()), jmodel.jointConfigSelector(q1.derived()),
-        jmodel.jointBlock(PINOCCHIO_EIGEN_CONST_CAST(JacobianMatrix, mat)), arg);
+        jmodel.jointJacBlock(PINOCCHIO_EIGEN_CONST_CAST(JacobianMatrix, mat)), arg);
     }
   };
 
@@ -736,7 +737,6 @@ namespace pinocchio
 
   PINOCCHIO_DETAILS_DISPATCH_JOINT_COMPOSITE_1(NeutralStepAlgo);
   PINOCCHIO_DETAILS_JOINT_MIMIC_1(NeutralStepAlgo);
-
 
   template<typename Visitor, typename JointModel>
   struct IntegrateCoeffWiseJacobianStepAlgo;

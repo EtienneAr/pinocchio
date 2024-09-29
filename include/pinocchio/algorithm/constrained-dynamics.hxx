@@ -117,7 +117,7 @@ namespace pinocchio
       if (parent > 0)
         ov += data.ov[parent];
 
-      jmodel.jointCols(data.J) = data.oMi[i].act(jdata.S());
+      jmodel.jointJacCols(data.J) = data.oMi[i].act(jdata.S());
       oinertias = data.oMi[i].act(model.inertias[i]);
       data.oYcrb[i] = data.oinertias[i];
       if (ContactMode)
@@ -165,8 +165,8 @@ namespace pinocchio
       const JointIndex i = jmodel.id();
       const JointIndex parent = model.parents[i];
 
-      ColsBlock dFda_cols = jmodel.jointCols(data.dFda);
-      const ColsBlock J_cols = jmodel.jointCols(data.J);
+      ColsBlock dFda_cols = jmodel.jointVelCols(data.dFda);
+      const ColsBlock J_cols = jmodel.jointJacCols(data.J);
       motionSet::inertiaAction(data.oYcrb[i], J_cols, dFda_cols);
 
       data.M.block(jmodel.idx_v(), jmodel.idx_v(), jmodel.nv(), data.nvSubtree[i]).noalias() =
@@ -567,7 +567,7 @@ namespace pinocchio
       else
         data.oMi[i] = data.liMi[i];
 
-      jmodel.jointCols(data.J) = data.oMi[i].act(jdata.S());
+      jmodel.jointJacCols(data.J) = data.oMi[i].act(jdata.S());
 
       data.ov[i] = data.oMi[i].act(jdata.v());
       if (parent > 0)
@@ -624,7 +624,7 @@ namespace pinocchio
       typename Inertia::Matrix6 & Ia = data.oYaba[i];
 
       typedef typename SizeDepType<JointModel::NV>::template ColsReturn<Matrix6x>::Type ColBlock;
-      ColBlock Jcols = jmodel.jointCols(data.J);
+      ColBlock Jcols = jmodel.jointJacCols(data.J);
 
       Force & fi_augmented = data.of_augmented[i];
       const Force & fi = data.of[i];
@@ -687,7 +687,7 @@ namespace pinocchio
       typename Inertia::Matrix6 & Ia = data.oYaba[i];
 
       typedef typename SizeDepType<JointModel::NV>::template ColsReturn<Matrix6x>::Type ColBlock;
-      ColBlock Jcols = jmodel.jointCols(data.J);
+      ColBlock Jcols = jmodel.jointJacCols(data.J);
 
       Force & fi_augmented = data.of_augmented[i];
       const Force & fi = data.of[i];
@@ -726,7 +726,7 @@ namespace pinocchio
       typedef typename Data::Matrix6x Matrix6x;
 
       typedef typename SizeDepType<JointModel::NV>::template ColsReturn<Matrix6x>::Type ColBlock;
-      ColBlock Jcols = jmodel.jointCols(data.J);
+      ColBlock Jcols = jmodel.jointJacCols(data.J);
 
       const JointIndex & i = jmodel.id();
       const JointIndex & parent = model.parents[i];
@@ -1100,7 +1100,7 @@ namespace pinocchio
 
       // subtract the bias forces from the torque to get Mv_dot_free
       jmodel.jointVelocitySelector(data.tau).noalias() -=
-        jmodel.jointCols(data.J).transpose() * (data.of[i].toVector());
+        jmodel.jointJacCols(data.J).transpose() * (data.of[i].toVector());
       data.of_augmented[i].toVector().setZero();
     }
 
@@ -1124,7 +1124,7 @@ namespace pinocchio
           const JointModel & jmodel = model.joints[i];
           data.oa_augmented[i].toVector().noalias() =
             data.oa_augmented[model.parents[i]].toVector()
-            + jmodel.jointCols(data.J) * jmodel.jointVelocitySelector(data.u);
+            + jmodel.jointJacCols(data.J) * jmodel.jointVelocitySelector(data.u);
           data.of_augmented[i].toVector().setZero();
         }
       }
@@ -1168,7 +1168,7 @@ namespace pinocchio
           data.of_augmented[parent] += data.of_augmented[i];
 
           jmodel.jointVelocitySelector(data.tau).noalias() =
-            -jmodel.jointCols(data.J).transpose() * (data.of_augmented[i].toVector());
+            -jmodel.jointJacCols(data.J).transpose() * (data.of_augmented[i].toVector());
         }
       }
 
