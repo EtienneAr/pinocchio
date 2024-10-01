@@ -126,7 +126,7 @@ namespace pinocchio
     const DataTpl<Scalar, Options, JointCollectionTpl> & data,
     const JointIndex jointIdRef,
     const JointIndex jointIdTarget,
-    const Convention convention = LOCAL);
+    const Convention convention = Convention::LOCAL);
 
   /**
    * @brief      Returns the spatial velocity of the joint expressed in the desired reference frame.
