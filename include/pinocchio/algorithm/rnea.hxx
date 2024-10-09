@@ -66,7 +66,7 @@ namespace pinocchio
           data.v[i] += data.liMi[i].actInv(data.v[parent]);
 
         data.a_gf[i] = jdata.c() + (data.v[i] ^ jdata.v());
-        data.a_gf[i] += jdata.S() * jmodel.jointVelocitySelector(a);
+        data.a_gf[i] += jdata.S() * jmodel.jointVelocityFromDofSelector(a);
         data.a_gf[i] += data.liMi[i].actInv(data.a_gf[parent]);
         //
         //      data.f[i] = model.inertias[i]*data.a_gf[i];// + model.inertias[i].vxiv(data.v[i]);
@@ -100,8 +100,7 @@ namespace pinocchio
 
         const JointIndex i = jmodel.id();
         const JointIndex parent = model.parents[i];
-
-        jmodel.jointVelocitySelector(data.tau) = jdata.S().transpose() * data.f[i];
+        jmodel.jointVelocityFromDofSelector(data.tau) += jdata.S().transpose() * data.f[i];
 
         if (parent > 0)
           data.f[parent] += data.liMi[i].act(data.f[i]);
@@ -133,6 +132,7 @@ namespace pinocchio
       typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
       typedef typename Model::JointIndex JointIndex;
 
+      data.tau.setZero();
       data.v[0].setZero();
       data.a_gf[0] = -model.gravity;
 
@@ -187,6 +187,7 @@ namespace pinocchio
       typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
       typedef typename Model::JointIndex JointIndex;
 
+      data.tau.setZero();
       data.v[0].setZero();
       data.a_gf[0] = -model.gravity;
 
@@ -283,7 +284,7 @@ namespace pinocchio
         const JointIndex & i = jmodel.id();
         const JointIndex & parent = model.parents[i];
 
-        jmodel.jointVelocitySelector(data.nle) = jdata.S().transpose() * data.f[i];
+        jmodel.jointVelocityFromDofSelector(data.nle) += jdata.S().transpose() * data.f[i];
         if (parent > 0)
           data.f[parent] += data.liMi[i].act(data.f[i]);
       }
@@ -311,6 +312,7 @@ namespace pinocchio
       typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
       typedef typename Model::JointIndex JointIndex;
 
+      data.nle.setZero();
       data.v[0].setZero();
       data.a_gf[0] = -model.gravity;
 
@@ -393,7 +395,7 @@ namespace pinocchio
         const JointIndex & i = jmodel.id();
         const JointIndex & parent = model.parents[i];
 
-        jmodel.jointVelocitySelector(g) = jdata.S().transpose() * data.f[i];
+        jmodel.jointVelocityFromDofSelector(g) += jdata.S().transpose() * data.f[i];
         if (parent > 0)
           data.f[(size_t)parent] += data.liMi[i].act(data.f[i]);
       }
@@ -418,6 +420,7 @@ namespace pinocchio
       typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
       typedef typename Model::JointIndex JointIndex;
 
+      data.g.setZero();
       data.a_gf[0] = -model.gravity;
 
       typedef ComputeGeneralizedGravityForwardStep<
@@ -429,6 +432,7 @@ namespace pinocchio
           model.joints[i], data.joints[i], typename Pass1::ArgsType(model, data, q.derived()));
       }
 
+      data.g.setZero();
       typedef ComputeGeneralizedGravityBackwardStep<Scalar, Options, JointCollectionTpl> Pass2;
       for (JointIndex i = (JointIndex)(model.njoints - 1); i > 0; --i)
       {
@@ -472,6 +476,7 @@ namespace pinocchio
         data.f[i] -= fext[i];
       }
 
+      data.tau.setZero();
       typedef ComputeGeneralizedGravityBackwardStep<Scalar, Options, JointCollectionTpl> Pass2;
       for (JointIndex i = (JointIndex)(model.njoints - 1); i > 0; --i)
       {
@@ -539,11 +544,11 @@ namespace pinocchio
         typedef
           typename SizeDepType<JointModel::NV>::template ColsReturn<typename Data::Matrix6x>::Type
             ColsBlock;
-        ColsBlock J_cols = jmodel.jointCols(data.J);
+        ColsBlock J_cols = jmodel.jointJacCols(data.J);
         J_cols = data.oMi[i].act(jdata.S()); // collection of S expressed at the world frame
 
         // computes vxS expressed at the world frame
-        ColsBlock dJ_cols = jmodel.jointCols(data.dJ);
+        ColsBlock dJ_cols = jmodel.jointJacCols(data.dJ);
         motionSet::motionAction(data.ov[i], J_cols, dJ_cols);
 
         data.B[i] = data.oYcrb[i].variation(Scalar(0.5) * data.ov[i]);
@@ -577,6 +582,12 @@ namespace pinocchio
       template<typename JointModel>
       static void algo(const JointModelBase<JointModel> & jmodel, const Model & model, Data & data)
       {
+
+        assert(
+          (std::is_same<JointModel, JointModelMimicTpl<Scalar, Options, JointCollectionTpl>>::value
+           == false)
+          && "Algorithm not supported for mimic joints");
+
         typedef typename Model::JointIndex JointIndex;
         typedef Eigen::Matrix<
           Scalar, JointModel::NV, 6, Options, JointModel::NV == Eigen::Dynamic ? 6 : JointModel::NV,
@@ -591,12 +602,12 @@ namespace pinocchio
         typedef
           typename SizeDepType<JointModel::NV>::template ColsReturn<typename Data::Matrix6x>::Type
             ColsBlock;
-        ColsBlock dJ_cols = jmodel.jointCols(data.dJ);
-        ColsBlock J_cols = jmodel.jointCols(data.J);
-        ColsBlock Ag_cols = jmodel.jointCols(data.Ag);
+        ColsBlock dJ_cols = jmodel.jointJacCols(data.dJ);
+        ColsBlock J_cols = jmodel.jointJacCols(data.J);
+        ColsBlock Ag_cols = jmodel.jointVelCols(data.Ag);
 
-        motionSet::inertiaAction(data.oYcrb[i], dJ_cols, jmodel.jointCols(data.dFdv));
-        jmodel.jointCols(data.dFdv).noalias() += data.B[i] * J_cols;
+        motionSet::inertiaAction(data.oYcrb[i], dJ_cols, jmodel.jointVelCols(data.dFdv));
+        jmodel.jointVelCols(data.dFdv).noalias() += data.B[i] * J_cols;
 
         data.C.block(jmodel.idx_v(), jmodel.idx_v(), jmodel.nv(), data.nvSubtree[i]).noalias() =
           J_cols.transpose() * data.dFdv.middleCols(jmodel.idx_v(), data.nvSubtree[i]);
@@ -673,6 +684,12 @@ namespace pinocchio
     template<typename JointModel>
     static void algo(const JointModelBase<JointModel> & jmodel, const Model & model, Data & data)
     {
+
+      assert(
+        (std::is_same<JointModel, JointModelMimicTpl<Scalar, Options, JointCollectionTpl>>::value
+         == false)
+        && "Algorithm not supported for mimic joints");
+
       typedef typename Model::JointIndex JointIndex;
       typedef Eigen::Matrix<
         Scalar, JointModel::NV, 6, Options, JointModel::NV == Eigen::Dynamic ? 6 : JointModel::NV,
@@ -687,11 +704,11 @@ namespace pinocchio
       typedef
         typename SizeDepType<JointModel::NV>::template ColsReturn<typename Data::Matrix6x>::Type
           ColsBlock;
-      ColsBlock dJ_cols = jmodel.jointCols(data.dJ);
-      ColsBlock J_cols = jmodel.jointCols(data.J);
-      ColsBlock Ag_cols = jmodel.jointCols(data.Ag);
+      ColsBlock dJ_cols = jmodel.jointJacCols(data.dJ);
+      ColsBlock J_cols = jmodel.jointJacCols(data.J);
+      ColsBlock Ag_cols = jmodel.jointVelCols(data.Ag);
       typename Data::Matrix6x & dFdv = data.Fcrb[0];
-      ColsBlock dFdv_cols = jmodel.jointCols(dFdv);
+      ColsBlock dFdv_cols = jmodel.jointVelCols(dFdv);
 
       motionSet::inertiaAction(data.oYcrb[i], dJ_cols, dFdv_cols);
       dFdv_cols.noalias() += data.B[i] * J_cols;
